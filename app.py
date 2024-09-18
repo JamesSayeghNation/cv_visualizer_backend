@@ -123,7 +123,7 @@ def process_cv():
         {cv_text}"""
         logger.info("Sending request to OpenAI")
         try:
-            response = client.chat.completions.create(
+            response = client.beta.chat.completions.parse(
                 model="gpt-4o-2024-08-06",
                 messages=[
                     {"role": "user", "content": [
