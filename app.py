@@ -73,58 +73,70 @@ def process_cv():
         cv_text = file.read().decode("utf-8")
         logger.info(f"Successfully read CV text, length: {len(cv_text)}")
 
-        # Build the prompt for OpenAI
         prompt = f"""You are a professional medical CV judge, you will be given a CV and you will need to label each part of that CV.
-You have to be very careful and precise in your labeling as the CV will be used to hire doctors for a hospital, lives are at stake, and all is in your hands. Do you feel the pressure yet?
+        You have to be very careful and precise in your labeling as the CV will be used to hire doctors for a hospital, lives are at stake, and all is in your hands. Do you feel the pressure yet?
 
-If you miss or mislabel the education for example, we could be hiring an underqualified doctor, and that could be catastrophic. So please be very careful and precise in your labeling.
-Consider that your own mother goes to that hospital, would you want her to be treated by an underqualified doctor? I don't think so.
+        If you miss or mislable the education for example, we could be hiring an underqualified doctor, and that could be catastrophic. So please be very careful and precise in your labeling.
+        Consider that your own mother goes to that hospital, would you want her to be treated by an underqualified doctor? I don't think so.
 
-Make sure to really cover everything, everything has a place inside the labels, and everything should be labeled. Any missed details will lead to catastrophic consequences.
+        Make sure to really cover everything, everything has a place inside the labels, and everything should be labeled. Any missed details will lead to catastrophic consequences.
 
-If the last name is something hyphenated, like "Smith-Jones", you should label it as "Smith" for the middle name and "Jones" for the last name.
+        If the last name is something hyphenated, like "Smith-Jones", you should label it as "Smith" for the middle name and "Jones" for the last name.
 
-Nothing can be labeled twice, ever
+        Nothing can be labeled twice, ever
 
-Whatever you label you have to copy as is from the CV, do not rewrite it in your own words. For example, don't change the way the journal publications are written, or anything else
+        Whatever you label you have to copy as is from hte CV, do not rewrite it in your own words. For example, don't change the way the journal publications are written, or anything else
 
-Sometimes you might forget a sentence, you might think it's something small, but it really isn't. You have the capability to label everything, therefore you will label everything. Anything you miss could lead to catastrophe in the hospital.
+        Sometimes you might forget a sentence, you might think it's something small, but it really isn't. You have the capability to label everything, therefore you will label everything. Anything you miss could lead to catastrophy in the hospital.
 
-If something like an education, publication or anything else spans multiple lines, don't put each line in a different string in the array, use \\n for the new lines.
+        If something like an education, publication or anything else spans multiple lines, don't put each line in a different string in the array, use \\n for the new lines.
 
-Make sure to correctly differentiate one education/experience etc. from the other. You have to correctly know the starts and ends of each one. You have made mistakes before.
+        Make sure to correctly differenciate one education/experience etc from the other. you have to correctly know the starts and ends of each one. You have made mistakes before
 
-e.g.:
-    You labeled this as one career_label:
-        Postdoctoral Associate
-        Yale University School of Medicine
-        68 05/2021 - Ongoing 9 New Haven, United States
-        Llor's and Xicola's Lab
-        + Programming languages: R, Python and basic Unix
-        + Cell culture of CRISPR engineered cells
-        - Germline and somatic mutational analysis
-        + RNAseq analysis
-        + Methylation analysis
-        + Neoepitope prediction analysis
-        + Western Blot
+#	Label Name	Items/Sections in CV to label
+        1	first_name	CV owner first name
+        2	last_name	CV owner last name
+        3	middle_name	CV owner middle name
+        4	contact_phone_number **	CV owner phone number(s)
+        5	contact_email **	CV owner email(s)
+        6	contact_address **	CV owner address
+        7	research_clinical_experience	Clinical trial, clinical research, clinical experience, other research experiences
+        8	grant_research	Grant, contract, grant history (must contain "grant")
+        9	career_item	Career/professional experience, internship, training, academic appointments, professional services, professional organizations
+        10	education	CV owner education section
+        11	certification_license	Certifications, licenses, credentials
+        12	award	Award, honors, distinguished appointments, professional honors, recognition
+        13	speaking_engagement_presentations	Speaking engagements, conferences, events, invited speaking engagements, presentations, symposiums, annual meetings, video/webinar
+        14	committee_associated_board_chair_investigator	Board of directors, board positions, board member, advisory board, editorial board, any board
+        15	journal_publications	Journal publications or journal bibliography (authored or co-authored by the CV owner)
+        16	book_publication	Book, chapter, pages publications, book bibliography (authored or co-authored by the CV owner)
+        17	other_publication **	Case reports, letters, notes, editorials, news/press, etc.
+        18	peer_review_publication	Peer-reviewed publications, original research, papers, research, editorial, books, journals, presentations/engagements
+        19	reviewer_role	Reviewer roles such as journal peer reviewer, book peer reviewer, grant reviewer, research reviewer, committee/board reviewer
+        20	Teaching_lecture_course	Teaching, lectures, courses, educational/mentoring activities
+        21	community_service	Community service, pro-bono work, free mentorship, volunteer work, free training
+        22	leadership_activities	Leadership activities, leadership programs, leadership experiences
 
-    When it should be 2 different career labels
+        I have also added an image to help you with the journals, books, and other publications. Make sure to label everything correctly.
 
-Here is the CV:
-{cv_text}
-
-Please output the result in JSON format matching the following schema:
-
-{CV.schema_json(indent=2)}
-"""
+        Here is the CV:
+        {cv_text}"""
         logger.info("Sending request to OpenAI")
         try:
             response = client.chat.completions.create(
                 model="gpt-4o-2024-08-06",
                 messages=[
-                    {"role": "user", "content": prompt},
+                    {"role": "user", "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": "https://i.ibb.co/jR2yDyb/G-LNK-AI-ML-Engineering-Overview-Strategy-Nation-Dev.jpg",
+                                },
+                            },
+                        ]},
                 ],
-                temperature=0.7,
+                response_format=CV,
                 max_tokens=16384,
             )
             logger.info("Received response from OpenAI")
