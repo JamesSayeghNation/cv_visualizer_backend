@@ -28,28 +28,29 @@ client = OpenAI(api_key=OPENAI_API_KEY, organization=OPENAI_ORG_ID)
 app = Flask(__name__)
 CORS(app)
 
-
-# Define the CV data model using Pydantic
 class CV(BaseModel):
     first_name: str
     middle_name: str
     last_name: str
-    journal_publication: list[str]
+    contact_phone_number: list[str]
+    contact_email: list[str]
+    contact_address: list[str]
+    research_clinical_experience: list[str]
     grant_research: list[str]
-    career_items: list[str]
+    career_item: list[str]
     education: list[str]
     certification_license: list[str]
     award: list[str]
-    speaking_engagement: list[str]
+    speaking_engagement_presentations: list[str]
+    committee_associated_board_chair_investigator: list[str]
+    journal_publications: list[str]
     book_publication: list[str]
-    research_clinical_experience: list[str]
+    other_publication: list[str]
     peer_review_publication: list[str]
+    reviewer_role: list[str]
     teaching_lecture_course: list[str]
-    committee_association_board_chair_investigator: list[str]
     community_service: list[str]
     leadership_activities: list[str]
-    reviewer_role: list[str]
-
 
 @app.route("/process_cv", methods=["POST"])
 def process_cv():
